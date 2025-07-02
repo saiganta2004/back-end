@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: smart-attendance-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: smart_attendance
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - smart-attendance-net
+
+  backend:
+    build: .
+    container_name: smart-attendance-backend
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - DATABASE_URL=jdbc:mysql://mysql:3306/smart_attendance?useSSL=false&serverTimezone=UTC
+      - DB_USERNAME=root
+      - DB_PASSWORD=root
+      - DDL_AUTO=update
+      - SHOW_SQL=false
+      - LOG_LEVEL=INFO
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+    networks:
+      - smart-attendance-net
+
+volumes:
+  mysql_data:
+
+networks:
+  smart-attendance-net:
+    driver: bridge
